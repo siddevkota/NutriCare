@@ -32,8 +32,8 @@ npx expo install expo-camera expo-sensors expo-image-picker expo-file-system
 
 ```typescript
 export const ROBOFLOW_CONFIG = {
-  apiKey: 'your_actual_api_key',
-  modelId: 'your_model_id',
+  apiKey: "your_actual_api_key",
+  modelId: "your_model_id",
   version: 1,
   // ... other settings
 };
