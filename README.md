@@ -1,7 +1,3 @@
-# NutriCare - Smart Food Weight Estimation App
-
-A React Native/Expo app that uses AI image segmentation and device motion tracking to estimate food weights from photos.
-
 ## Features
 
 - 🤖 **Real Roboflow API Integration**: Uses actual computer vision models for food detection and segmentation
