@@ -1,4 +1,4 @@
-# Enhanced Smart Food Weight Estimation App
+# NutriCare - Smart Food Weight Estimation App
 
 A React Native/Expo app that uses AI image segmentation and device motion tracking to estimate food weights from photos.
 
