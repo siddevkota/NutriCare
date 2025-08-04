@@ -1,0 +1,155 @@
+{
+  "glycemic_data": {
+    "selroti": {
+      "gi_value": 75,
+      "gi_category": "high",
+      "gi_range": [70, 80],
+      "glycemic_load_per_serving": 40.5,
+      "gl_category": "high"
+    },
+    "bhat": {
+      "gi_value": 70,
+      "gi_category": "high",
+      "gi_range": [65, 75],
+      "glycemic_load_per_serving": 31.2,
+      "gl_category": "high"
+    },
+    "burger": {
+      "gi_value": 68,
+      "gi_category": "medium",
+      "gi_range": [66, 70],
+      "glycemic_load_per_serving": 29.4,
+      "gl_category": "high"
+    },
+    "chana masala": {
+      "gi_value": 28,
+      "gi_category": "low",
+      "gi_range": [25, 35],
+      "glycemic_load_per_serving": 7.6,
+      "gl_category": "low"
+    },
+    "chiya": {
+      "gi_value": 72,
+      "gi_category": "high",
+      "gi_range": [65, 80],
+      "glycemic_load_per_serving": 21.6,
+      "gl_category": "high"
+    },
+    "chowmein": {
+      "gi_value": 35,
+      "gi_category": "low",
+      "gi_range": [30, 40],
+      "glycemic_load_per_serving": 40.3,
+      "gl_category": "high"
+    },
+    "daal": {
+      "gi_value": 16,
+      "gi_category": "low",
+      "gi_range": [10, 25],
+      "glycemic_load_per_serving": 6.4,
+      "gl_category": "low"
+    },
+    "dhido": {
+      "gi_value": 40,
+      "gi_category": "low",
+      "gi_range": [35, 45],
+      "glycemic_load_per_serving": 16.0,
+      "gl_category": "medium"
+    },
+    "gundruk": {
+      "gi_value": 10,
+      "gi_category": "low",
+      "gi_range": [5, 15],
+      "glycemic_load_per_serving": 0.3,
+      "gl_category": "low"
+    },
+    "kheer": {
+      "gi_value": 59,
+      "gi_category": "medium",
+      "gi_range": [55, 65],
+      "glycemic_load_per_serving": 30.7,
+      "gl_category": "high"
+    },
+    "masu": {
+      "gi_value": 0,
+      "gi_category": "very_low",
+      "gi_range": [0, 5],
+      "glycemic_load_per_serving": 0,
+      "gl_category": "low"
+    },
+    "momo": {
+      "gi_value": 85,
+      "gi_category": "high",
+      "gi_range": [80, 90],
+      "glycemic_load_per_serving": 27.2,
+      "gl_category": "high"
+    },
+    "pakoda": {
+      "gi_value": 65,
+      "gi_category": "medium",
+      "gi_range": [60, 70],
+      "glycemic_load_per_serving": 9.8,
+      "gl_category": "low"
+    },
+    "roti": {
+      "gi_value": 62,
+      "gi_category": "medium",
+      "gi_range": [58, 66],
+      "glycemic_load_per_serving": 17.3,
+      "gl_category": "medium"
+    },
+    "samosa": {
+      "gi_value": 60,
+      "gi_category": "medium",
+      "gi_range": [55, 65],
+      "glycemic_load_per_serving": 19.3,
+      "gl_category": "medium"
+    },
+    "yomari": {
+      "gi_value": 77,
+      "gi_category": "high",
+      "gi_range": [75, 80],
+      "glycemic_load_per_serving": 19.3,
+      "gl_category": "medium"
+    }
+  },
+  "gi_categories": {
+    "very_low": {
+      "range": [0, 15],
+      "risk_level": "very_low",
+      "description": "Minimal blood sugar impact"
+    },
+    "low": {
+      "range": [16, 55],
+      "risk_level": "low",
+      "description": "Slow, steady blood sugar rise"
+    },
+    "medium": {
+      "range": [56, 69],
+      "risk_level": "medium",
+      "description": "Moderate blood sugar impact"
+    },
+    "high": {
+      "range": [70, 100],
+      "risk_level": "high",
+      "description": "Rapid blood sugar spike"
+    }
+  },
+  "gl_categories": {
+    "low": {
+      "range": [0, 10],
+      "risk_level": "low",
+      "description": "Low glycemic load per serving"
+    },
+    "medium": {
+      "range": [11, 19],
+      "risk_level": "medium",
+      "description": "Medium glycemic load per serving"
+    },
+    "high": {
+      "range": [20, 100],
+      "risk_level": "high",
+      "description": "High glycemic load per serving"
+    }
+  }
+}

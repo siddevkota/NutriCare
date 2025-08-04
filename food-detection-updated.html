@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nepali Food Detection with Roboflow</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .upload-area {
+        border: 3px dashed #3498db;
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        margin-bottom: 20px;
+        background-color: #ecf0f1;
+        transition: all 0.3s ease;
+      }
+      .upload-area.dragover {
+        border-color: #2ecc71;
+        background-color: #d5f4e6;
+      }
+      .upload-area:hover {
+        border-color: #2980b9;
+        background-color: #e8f4f8;
+      }
+      input[type="file"] {
+        display: none;
+      }
+      .upload-btn {
+        background-color: #3498db;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 10px;
+        transition: background-color 0.3s;
+      }
+      .upload-btn:hover {
+        background-color: #2980b9;
+      }
+      .test-btn {
+        background-color: #27ae60;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        margin: 5px;
+      }
+      .test-btn:hover {
+        background-color: #229954;
+      }
+      .api-toggle {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .api-toggle label {
+        margin: 0 10px;
+        font-weight: bold;
+      }
+      .api-toggle input[type="radio"] {
+        margin-right: 5px;
+      }
+      .image-preview {
+        text-align: center;
+        margin: 20px 0;
+      }
+      .image-preview img {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .results {
+        margin-top: 20px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #28a745;
+      }
+      .error {
+        background-color: #f8d7da;
+        border-left-color: #dc3545;
+        color: #721c24;
+      }
+      .detected-classes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 15px 0;
+      }
+      .class-tag {
+        background-color: #007bff;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .area-info,
+      .weight-info {
+        background-color: #ffffff;
+        border: 1px solid #e3e6f0;
+        border-radius: 6px;
+        padding: 15px;
+        margin: 10px 0;
+      }
+      .food-area-item,
+      .food-weight-item {
+        background-color: #f8f9fa;
+        border-left: 3px solid #007bff;
+        padding: 10px;
+        margin: 8px 0;
+        border-radius: 0 4px 4px 0;
+      }
+      .food-weight-item {
+        border-left-color: #28a745;
+      }
+      .total-area {
+        background-color: #e7f3ff;
+        border-left: 3px solid #0056b3;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 0 4px 4px 0;
+        font-weight: bold;
+      }
+      .calibration-note {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 4px;
+        padding: 10px;
+        margin-top: 10px;
+        color: #856404;
+      }
+      .mask-canvas {
+        margin: 20px 0;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        max-width: 100%;
+      }
+      .debug-info {
+        background-color: #e9ecef;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 15px;
+        font-family: monospace;
+        font-size: 12px;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .loading {
+        text-align: center;
+        padding: 20px;
+      }
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .status-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+      .status-online {
+        background-color: #28a745;
+      }
+      .status-offline {
+        background-color: #dc3545;
+      }
+      .controls {
+        margin: 20px 0;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🍽️ Nepali Food Detection</h1>
+      <p style="text-align: center; color: #666">
+        Upload an image to detect Nepali food items using Roboflow AI
+      </p>
+
+      <!-- API Method Selection -->
+      <div class="api-toggle">
+        <h3>Choose Detection Method:</h3>
+        <label>
+          <input type="radio" name="apiMethod" value="backend" checked />
+          <span class="status-indicator" id="backendStatus"></span>
+          Python Backend with Roboflow SDK (Recommended)
+        </label>
+        <label>
+          <input type="radio" name="apiMethod" value="direct" />
+          <span class="status-indicator" id="directStatus"></span>
+          Direct Roboflow API via Proxy (Alternative)
+        </label>
+      </div>
+
+      <!-- Test Controls -->
+      <div class="controls">
+        <button class="test-btn" onclick="testBackendConnection()">
+          Test Backend
+        </button>
+        <button class="test-btn" onclick="testDirectAPI()">
+          Test Direct API
+        </button>
+        <button class="test-btn" onclick="getAvailableClasses()">
+          Get Classes
+        </button>
+      </div>
+
+      <!-- Upload Area -->
+      <div class="upload-area" id="uploadArea">
+        <p>📸 Click to upload an image or drag and drop here</p>
+        <button
+          class="upload-btn"
+          onclick="document.getElementById('fileInput').click()"
+        >
+          Choose Image
+        </button>
+        <input
+          type="file"
+          id="fileInput"
+          accept="image/*"
+          onchange="handleFileSelect(event)"
+        />
+      </div>
+
+      <!-- Image Preview -->
+      <div class="image-preview" id="imagePreview"></div>
+
+      <!-- Results Area -->
+      <div id="results"></div>
+
+      <!-- Debug Information -->
+      <div id="debugInfo" class="debug-info" style="display: none"></div>
+    </div>
+
+    <script>
+      // Configuration
+      const ROBOFLOW_CONFIG = {
+        apiKey: "3WRiAnFfpoD83Bevoupm",
+        projectId: "new-merged-0ma7p",
+        version: 3,
+        segmentEndpoint: `https://segment.roboflow.com/new-merged-0ma7p/3`,
+      };
+
+      const BACKEND_URL = "http://localhost:5000";
+
+      let currentImage = null;
+      let debugMode = false;
+
+      // Initialize page
+      document.addEventListener("DOMContentLoaded", function () {
+        setupDragAndDrop();
+        checkBackendStatus();
+        checkDirectAPIStatus();
+
+        // Toggle debug mode with Ctrl+D
+        document.addEventListener("keydown", function (e) {
+          if (e.ctrlKey && e.key === "d") {
+            e.preventDefault();
+            debugMode = !debugMode;
+            document.getElementById("debugInfo").style.display = debugMode
+              ? "block"
+              : "none";
+            console.log("Debug mode:", debugMode ? "ON" : "OFF");
+          }
+        });
+      });
+
+      function setupDragAndDrop() {
+        const uploadArea = document.getElementById("uploadArea");
+
+        uploadArea.addEventListener("dragover", function (e) {
+          e.preventDefault();
+          uploadArea.classList.add("dragover");
+        });
+
+        uploadArea.addEventListener("dragleave", function (e) {
+          e.preventDefault();
+          uploadArea.classList.remove("dragover");
+        });
+
+        uploadArea.addEventListener("drop", function (e) {
+          e.preventDefault();
+          uploadArea.classList.remove("dragover");
+
+          const files = e.dataTransfer.files;
+          if (files.length > 0) {
+            handleFile(files[0]);
+          }
+        });
+      }
+
+      function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+          handleFile(file);
+        }
+      }
+
+      function handleFile(file) {
+        if (!file.type.startsWith("image/")) {
+          showError("Please select a valid image file.");
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          currentImage = e.target.result;
+          displayImage(currentImage);
+          predictFood();
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function displayImage(imageSrc) {
+        const preview = document.getElementById("imagePreview");
+        preview.innerHTML = `<img src="${imageSrc}" alt="Uploaded image">`;
+      }
+
+      async function predictFood() {
+        if (!currentImage) {
+          showError("No image selected.");
+          return;
+        }
+
+        const method = document.querySelector(
+          'input[name="apiMethod"]:checked'
+        ).value;
+
+        showLoading("Analyzing image...");
+
+        try {
+          let result;
+          if (method === "backend") {
+            result = await predictWithBackend();
+          } else {
+            result = await predictWithDirectAPI();
+          }
+
+          displayResults(result);
+        } catch (error) {
+          console.error("Prediction error:", error);
+          showError(`Prediction failed: ${error.message}`);
+        }
+      }
+
+      async function predictWithBackend() {
+        const base64Image = currentImage.split(",")[1];
+
+        const response = await fetch(`${BACKEND_URL}/predict`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            image: base64Image,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Backend error: ${response.status} ${response.statusText}`
+          );
+        }
+
+        return await response.json();
+      }
+
+      async function predictWithDirectAPI() {
+        const base64Image = currentImage.split(",")[1];
+
+        // Use the backend proxy to avoid CORS issues
+        const response = await fetch(`${BACKEND_URL}/direct-predict`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            image: base64Image,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Direct API proxy error: ${response.status} ${response.statusText}`
+          );
+        }
+
+        return await response.json();
+      }
+
+      function extractDetectedClasses(result) {
+        const detectedClasses = [];
+
+        if (result.segmentation_mask && result.class_map) {
+          // For now, return all non-background classes
+          // In a full implementation, you'd decode the mask
+          for (const [id, className] of Object.entries(result.class_map)) {
+            const cleanName = className.trim();
+            if (cleanName && cleanName.toLowerCase() !== "background") {
+              detectedClasses.push(cleanName);
+            }
+          }
+        }
+
+        return detectedClasses;
+      }
+
+      function displayResults(result) {
+        const resultsDiv = document.getElementById("results");
+
+        if (result.status === "error") {
+          showError(result.message || "Prediction failed");
+          return;
+        }
+
+        const detectedClasses = result.detected_classes || [];
+
+        let html = "<h3>🎯 Detection Results</h3>";
+
+        if (detectedClasses.length > 0) {
+          html += "<h4>Detected Food Items:</h4>";
+          html += '<div class="detected-classes">';
+          detectedClasses.forEach((className) => {
+            html += `<span class="class-tag">${className}</span>`;
+          });
+          html += "</div>";
+          html += `<p><strong>Total classes detected:</strong> ${detectedClasses.length}</p>`;
+
+          // Display area information
+          if (
+            result.class_areas &&
+            Object.keys(result.class_areas).length > 0
+          ) {
+            html += "<h4>📏 Area Analysis:</h4>";
+            html += '<div class="area-info">';
+
+            Object.entries(result.class_areas).forEach(
+              ([className, areaData]) => {
+                html += `
+                            <div class="food-area-item">
+                                <strong>${className}:</strong> 
+                                ${areaData.pixels.toLocaleString()} pixels 
+                                (${areaData.percentage}% of image)
+                            </div>
+                        `;
+              }
+            );
+
+            if (result.total_food_area) {
+              html += `
+                            <div class="total-area">
+                                <strong>Total Food Coverage:</strong> 
+                                ${result.total_food_area.pixels.toLocaleString()} pixels 
+                                (${result.total_food_area.percentage}% of image)
+                            </div>
+                        `;
+            }
+            html += "</div>";
+          }
+
+          // Display weight estimates
+          if (
+            result.weight_estimates &&
+            Object.keys(result.weight_estimates).length > 0
+          ) {
+            html += "<h4>⚖️ Weight Estimates:</h4>";
+            html += '<div class="weight-info">';
+
+            Object.entries(result.weight_estimates).forEach(
+              ([className, weightData]) => {
+                html += `
+                            <div class="food-weight-item">
+                                <strong>${className}:</strong><br>
+                                📊 <strong>${
+                                  weightData.estimated_weight_grams
+                                }g</strong> 
+                                (${weightData.estimated_weight_oz} oz)<br>
+                                📐 Area: ${weightData.area_cm2} cm²<br>
+                                <small>Density: ${
+                                  weightData.density_used
+                                } g/cm² • Confidence: ${
+                  weightData.confidence
+                }</small>
+                                ${
+                                  weightData.note
+                                    ? `<br><small style="color: orange;">⚠️ ${weightData.note}</small>`
+                                    : ""
+                                }
+                            </div>
+                        `;
+              }
+            );
+
+            if (result.calibration_info) {
+              html += `
+                            <div class="calibration-note">
+                                <small>
+                                    <strong>📋 Calibration Info:</strong><br>
+                                    Estimated image area: ${result.calibration_info.estimated_image_area_cm2} cm²<br>
+                                    Assumed food thickness: ${result.calibration_info.assumed_thickness_cm} cm<br>
+                                    <em>${result.calibration_info.note}</em>
+                                </small>
+                            </div>
+                        `;
+            }
+            html += "</div>";
+          }
+        } else {
+          html += "<p>No food items detected in the image.</p>";
+        }
+
+        // Display mask dimensions
+        if (result.mask_info) {
+          html += `
+                    <h4>🖼️ Image Analysis:</h4>
+                    <p><strong>Mask dimensions:</strong> ${
+                      result.mask_info.width
+                    } × ${result.mask_info.height} pixels</p>
+                    <p><strong>Total pixels analyzed:</strong> ${result.mask_info.total_pixels.toLocaleString()}</p>
+                `;
+        }
+
+        // Display segmentation mask if available
+        if (result.segmentation_mask) {
+          html += "<h4>🎨 Segmentation Mask:</h4>";
+          html += `<img src="data:image/png;base64,${result.segmentation_mask}" class="mask-canvas" alt="Segmentation mask">`;
+        }
+
+        // Image info
+        if (result.image_info) {
+          html += `<p><strong>Original image:</strong> ${
+            result.image_info.width || "N/A"
+          } × ${result.image_info.height || "N/A"}</p>`;
+        }
+
+        resultsDiv.innerHTML = html;
+        resultsDiv.className = "results";
+
+        // Debug information
+        if (debugMode) {
+          updateDebugInfo(result);
+        }
+      }
+
+      function showLoading(message) {
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>${message}</p>
+                </div>
+            `;
+        resultsDiv.className = "results";
+      }
+
+      function showError(message) {
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = `
+                <h3>❌ Error</h3>
+                <p>${message}</p>
+                <p><small>💡 <strong>Troubleshooting tips:</strong></p>
+                <ul>
+                    <li>Make sure the backend server is running on localhost:5000</li>
+                    <li>Check your internet connection for direct API calls</li>
+                    <li>Verify the image is a valid format (JPG, PNG, etc.)</li>
+                    <li>Try refreshing the page and uploading again</li>
+                </ul>
+            `;
+        resultsDiv.className = "results error";
+      }
+
+      function updateDebugInfo(data) {
+        document.getElementById("debugInfo").innerHTML = `
+                <h4>🐛 Debug Information</h4>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+      }
+
+      async function checkBackendStatus() {
+        try {
+          const response = await fetch(`${BACKEND_URL}/health`);
+          const statusElement = document.getElementById("backendStatus");
+
+          if (response.ok) {
+            statusElement.className = "status-indicator status-online";
+            statusElement.title = "Backend is online";
+          } else {
+            statusElement.className = "status-indicator status-offline";
+            statusElement.title = "Backend is offline";
+          }
+        } catch (error) {
+          document.getElementById("backendStatus").className =
+            "status-indicator status-offline";
+          document.getElementById("backendStatus").title = "Backend is offline";
+        }
+      }
+
+      async function checkDirectAPIStatus() {
+        // Direct API status is harder to check without making a real request
+        // For now, assume it's online
+        document.getElementById("directStatus").className =
+          "status-indicator status-online";
+        document.getElementById("directStatus").title = "Direct API available";
+      }
+
+      async function testBackendConnection() {
+        try {
+          showLoading("Testing backend connection...");
+          const response = await fetch(`${BACKEND_URL}/test`);
+          const result = await response.json();
+
+          if (result.status === "success") {
+            displayResults({
+              status: "success",
+              detected_classes: ["Test successful"],
+              message: "Backend connection test passed",
+              raw_result: result,
+            });
+          } else {
+            showError(`Backend test failed: ${result.message}`);
+          }
+        } catch (error) {
+          showError(`Backend connection failed: ${error.message}`);
+        }
+      }
+
+      async function testDirectAPI() {
+        try {
+          showLoading("Testing direct API connection via proxy...");
+
+          // Create a proper test image by converting a canvas to base64
+          const canvas = document.createElement("canvas");
+          canvas.width = 100;
+          canvas.height = 100;
+          const ctx = canvas.getContext("2d");
+
+          // Draw a simple test pattern
+          ctx.fillStyle = "#FF0000";
+          ctx.fillRect(0, 0, 50, 50);
+          ctx.fillStyle = "#00FF00";
+          ctx.fillRect(50, 0, 50, 50);
+          ctx.fillStyle = "#0000FF";
+          ctx.fillRect(0, 50, 50, 50);
+          ctx.fillStyle = "#FFFF00";
+          ctx.fillRect(50, 50, 50, 50);
+
+          // Convert to base64 (JPEG format)
+          const testImageBase64 = canvas
+            .toDataURL("image/jpeg", 0.8)
+            .split(",")[1];
+
+          const response = await fetch(`${BACKEND_URL}/direct-predict`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              image: testImageBase64,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.status === "success") {
+            displayResults({
+              status: "success",
+              detected_classes: result.detected_classes || [
+                "Direct API test passed",
+              ],
+              total_classes: result.total_classes || 0,
+              message: "Direct API test via proxy completed successfully",
+              segmentation_mask: result.segmentation_mask,
+              class_map: result.class_map,
+              raw_result: result,
+            });
+          } else {
+            showError(
+              `Direct API test failed: ${result.message || "Unknown error"}`
+            );
+          }
+        } catch (error) {
+          showError(`Direct API connection failed: ${error.message}`);
+        }
+      }
+
+      async function getAvailableClasses() {
+        try {
+          showLoading("Fetching available classes...");
+          const response = await fetch(`${BACKEND_URL}/classes`);
+          const result = await response.json();
+
+          if (result.status === "success") {
+            let html = "<h3>📋 Available Food Classes</h3>";
+            html += '<div class="detected-classes">';
+            result.available_classes.forEach((className) => {
+              html += `<span class="class-tag">${className}</span>`;
+            });
+            html += "</div>";
+            html += `<p><strong>Total classes available:</strong> ${result.total_classes}</p>`;
+
+            document.getElementById("results").innerHTML = html;
+            document.getElementById("results").className = "results";
+          } else {
+            showError(`Failed to get classes: ${result.message}`);
+          }
+        } catch (error) {
+          showError(`Failed to fetch classes: ${error.message}`);
+        }
+      }
+    </script>
+  </body>
+</html>

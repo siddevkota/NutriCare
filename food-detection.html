@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Food Detection with Roboflow</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+      .upload-section {
+        border: 2px dashed #ddd;
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        margin: 20px 0;
+        transition: border-color 0.3s ease;
+      }
+      .upload-section:hover {
+        border-color: #007bff;
+      }
+      .upload-section.dragover {
+        border-color: #007bff;
+        background-color: #f8f9fa;
+      }
+      input[type="file"] {
+        display: none;
+      }
+      .upload-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      .upload-btn:hover {
+        background-color: #0056b3;
+      }
+      .config-section {
+        margin: 20px 0;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+      }
+      .config-section label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      .config-section input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 10px;
+      }
+      .analyze-btn {
+        background-color: #28a745;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+        margin: 10px 0;
+      }
+      .analyze-btn:hover {
+        background-color: #218838;
+      }
+      .analyze-btn:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+      }
+      .results {
+        margin-top: 20px;
+      }
+      .image-container {
+        display: flex;
+        gap: 20px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+      }
+      .image-box {
+        flex: 1;
+        min-width: 300px;
+      }
+      .image-box img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+      .predicted-classes {
+        background-color: #e7f3ff;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+      }
+      .class-item {
+        background-color: white;
+        padding: 8px 12px;
+        margin: 5px;
+        border-radius: 20px;
+        display: inline-block;
+        border: 2px solid #007bff;
+        color: #007bff;
+        font-weight: bold;
+      }
+      .loading {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+      }
+      .error {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+      }
+      .success {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🍽️ Food Detection with Roboflow</h1>
+
+      <div class="config-section">
+        <label for="apiKey">Roboflow API Key:</label>
+        <input
+          type="text"
+          id="apiKey"
+          placeholder="Enter your Roboflow API key"
+          value="3WRiAnFfpoD83Bevoupm"
+        />
+        <small style="color: #666"
+          >💡 Get your API key from: Roboflow Dashboard → Settings → API</small
+        >
+
+        <label for="modelEndpoint" style="margin-top: 15px"
+          >Model Endpoint:</label
+        >
+        <input
+          type="text"
+          id="modelEndpoint"
+          placeholder="e.g., your-workspace/your-model/version"
+          value="new-merged-0ma7p/3"
+        />
+        <small style="color: #666"
+          >💡 Format: workspace-name/model-name/version</small
+        >
+      </div>
+
+      <div class="upload-section" id="uploadSection">
+        <p>📷 Drag & drop an image here or click to select</p>
+        <button
+          class="upload-btn"
+          onclick="document.getElementById('imageInput').click()"
+        >
+          Choose Image
+        </button>
+        <input type="file" id="imageInput" accept="image/*" />
+      </div>
+
+      <button
+        class="analyze-btn"
+        id="analyzeBtn"
+        onclick="analyzeImage()"
+        disabled
+      >
+        Analyze Food Image
+      </button>
+
+      <button
+        class="analyze-btn"
+        id="testBtn"
+        onclick="testAPI()"
+        style="background-color: #6c757d; margin-top: 5px"
+      >
+        🧪 Test API Connection
+      </button>
+
+      <div id="results" class="results"></div>
+    </div>
+
+    <script>
+      let selectedImage = null;
+      let selectedImageFile = null;
+
+      // File input handling
+      document
+        .getElementById("imageInput")
+        .addEventListener("change", handleImageSelect);
+
+      // Drag and drop handling
+      const uploadSection = document.getElementById("uploadSection");
+      uploadSection.addEventListener("dragover", handleDragOver);
+      uploadSection.addEventListener("drop", handleDrop);
+      uploadSection.addEventListener("dragleave", handleDragLeave);
+
+      function handleImageSelect(event) {
+        const file = event.target.files[0];
+        if (file && file.type.startsWith("image/")) {
+          selectedImageFile = file;
+          displayImage(file);
+          updateAnalyzeButton();
+        }
+      }
+
+      function handleDragOver(event) {
+        event.preventDefault();
+        uploadSection.classList.add("dragover");
+      }
+
+      function handleDrop(event) {
+        event.preventDefault();
+        uploadSection.classList.remove("dragover");
+
+        const file = event.dataTransfer.files[0];
+        if (file && file.type.startsWith("image/")) {
+          selectedImageFile = file;
+          displayImage(file);
+          updateAnalyzeButton();
+        }
+      }
+
+      function handleDragLeave() {
+        uploadSection.classList.remove("dragover");
+      }
+
+      function displayImage(file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          selectedImage = e.target.result;
+          const resultsDiv = document.getElementById("results");
+          resultsDiv.innerHTML = `
+                    <div class="image-container">
+                        <div class="image-box">
+                            <h3>Original Image</h3>
+                            <img src="${selectedImage}" alt="Selected image">
+                        </div>
+                    </div>
+                `;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function updateAnalyzeButton() {
+        const apiKey = document.getElementById("apiKey").value;
+        const modelEndpoint = document.getElementById("modelEndpoint").value;
+        const analyzeBtn = document.getElementById("analyzeBtn");
+
+        analyzeBtn.disabled = !(selectedImageFile && apiKey && modelEndpoint);
+      }
+
+      // Update button state when API key or model endpoint changes
+      document
+        .getElementById("apiKey")
+        .addEventListener("input", updateAnalyzeButton);
+      document
+        .getElementById("modelEndpoint")
+        .addEventListener("input", updateAnalyzeButton);
+
+      async function testAPI() {
+        const apiKey = document.getElementById("apiKey").value;
+        const modelEndpoint = document.getElementById("modelEndpoint").value;
+        const testBtn = document.getElementById("testBtn");
+        const resultsDiv = document.getElementById("results");
+
+        if (!apiKey || !modelEndpoint) {
+          showError("Please provide API key and model endpoint.");
+          return;
+        }
+
+        testBtn.disabled = true;
+        testBtn.textContent = "Testing...";
+
+        try {
+          // Test with different approaches
+          console.log("Testing API with:");
+          console.log("API Key:", apiKey);
+          console.log("Model Endpoint:", modelEndpoint);
+
+          // Try the inference SDK approach first
+          const testImageUrl = "https://i.imgur.com/PEEvqPN.png";
+
+          // Method 1: Try with image URL parameter (like the JavaScript example)
+          let response = await fetch(
+            `https://serverless.roboflow.com/${modelEndpoint}?api_key=${apiKey}&image=${encodeURIComponent(
+              testImageUrl
+            )}`,
+            {
+              method: "POST",
+            }
+          );
+
+          console.log("Response status:", response.status);
+          console.log("Response headers:", [...response.headers.entries()]);
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.log("Error response:", errorText);
+
+            // If URL method fails, try a different approach
+            if (response.status === 401) {
+              resultsDiv.innerHTML = `
+                <div class="error">❌ Authentication Failed</div>
+                <div style="margin-top: 15px; padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px;">
+                  <h4>⚠️ API Key Issue Detected</h4>
+                  <p><strong>Current API Key:</strong> ${apiKey}</p>
+                  <p><strong>Model:</strong> ${modelEndpoint}</p>
+                  <p><strong>Error:</strong> ${errorText}</p>
+                  <br>
+                  <p><strong>Possible Solutions:</strong></p>
+                  <ol>
+                    <li><strong>Check your Roboflow dashboard</strong> - Make sure this API key has access to the model</li>
+                    <li><strong>Verify model path</strong> - Ensure "${modelEndpoint}" is the correct workspace/model/version</li>
+                    <li><strong>Check permissions</strong> - The API key might not have access to this specific model</li>
+                    <li><strong>Try a different model</strong> - Test with a public model first</li>
+                  </ol>
+                  <br>
+                  <p><em>💡 Tip: In your Roboflow dashboard, go to your model → Deploy → API to see the exact endpoint and key to use.</em></p>
+                </div>
+              `;
+              return;
+            }
+
+            throw new Error(
+              `API test failed: ${response.status} ${response.statusText}. Response: ${errorText}`
+            );
+          }
+
+          const result = await response.json();
+          console.log("Success response:", result);
+
+          resultsDiv.innerHTML = `
+            <div class="success">✅ API Connection Test Successful!</div>
+            <div style="margin-top: 15px; padding: 15px; background-color: #e7f3ff; border-radius: 5px;">
+              <h4>🎉 Your API is working correctly!</h4>
+              <p><strong>Model:</strong> ${modelEndpoint}</p>
+              <p><strong>Status:</strong> Connected and responding</p>
+              <p>You can now upload and analyze your own food images.</p>
+              <details style="margin-top: 10px;">
+                <summary>Test Response</summary>
+                <pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 12px;">${JSON.stringify(
+                  result,
+                  null,
+                  2
+                )}</pre>
+              </details>
+            </div>
+          `;
+        } catch (error) {
+          console.error("API Test Error:", error);
+          showError(`API Test Failed: ${error.message}`);
+        } finally {
+          testBtn.disabled = false;
+          testBtn.textContent = "🧪 Test API Connection";
+        }
+      }
+
+      async function analyzeImage() {
+        const apiKey = document.getElementById("apiKey").value;
+        const modelEndpoint = document.getElementById("modelEndpoint").value;
+        const resultsDiv = document.getElementById("results");
+
+        if (!selectedImageFile || !apiKey || !modelEndpoint) {
+          showError("Please select an image and provide API credentials.");
+          return;
+        }
+
+        // Show loading state
+        const analyzeBtn = document.getElementById("analyzeBtn");
+        analyzeBtn.disabled = true;
+        analyzeBtn.textContent = "Analyzing...";
+
+        try {
+          // Convert image to base64
+          const base64Image = await fileToBase64(selectedImageFile);
+          // Remove data:image/jpeg;base64, prefix to get just the base64 string
+          const imageBase64 = base64Image.split(",")[1];
+
+          console.log("API Key:", apiKey);
+          console.log("Model Endpoint:", modelEndpoint);
+          console.log(
+            "Request URL:",
+            `https://serverless.roboflow.com/${modelEndpoint}`
+          );
+
+          // Use the exact format from your JavaScript example
+          const response = await fetch(
+            `https://serverless.roboflow.com/${modelEndpoint}?api_key=${apiKey}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: imageBase64,
+            }
+          );
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Response error:", errorText);
+            throw new Error(
+              `API request failed: ${response.status} ${response.statusText}. Response: ${errorText}`
+            );
+          }
+
+          const result = await response.json();
+          console.log("API Response:", result);
+          displayResults(result);
+        } catch (error) {
+          console.error("Error:", error);
+          showError(`Analysis failed: ${error.message}`);
+        } finally {
+          // Reset button state
+          analyzeBtn.disabled = false;
+          analyzeBtn.textContent = "Analyze Food Image";
+          updateAnalyzeButton();
+        }
+      }
+
+      function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = (error) => reject(error);
+        });
+      }
+
+      function decodePredictedClasses(segmentationMask, classMap) {
+        if (!segmentationMask || !classMap) {
+          return [];
+        }
+
+        // Create a canvas to decode the base64 segmentation mask
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = function () {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            ctx.drawImage(img, 0, 0);
+
+            // Get image data
+            const imageData = ctx.getImageData(
+              0,
+              0,
+              canvas.width,
+              canvas.height
+            );
+            const data = imageData.data;
+
+            // Find unique pixel values (class IDs)
+            const uniqueValues = new Set();
+            for (let i = 0; i < data.length; i += 4) {
+              // Use the red channel as class ID (grayscale mask)
+              uniqueValues.add(data[i]);
+            }
+
+            // Map class IDs to class names
+            const detectedClasses = [];
+            uniqueValues.forEach((classId) => {
+              if (classMap[classId] && classMap[classId] !== "background") {
+                detectedClasses.push(classMap[classId]);
+              }
+            });
+
+            resolve(detectedClasses);
+          };
+          img.src = `data:image/png;base64,${segmentationMask}`;
+        });
+      }
+
+      async function displayResults(result) {
+        const resultsDiv = document.getElementById("results");
+
+        try {
+          // Extract predictions and class map
+          const predictions = result.predictions || result;
+          const classMap = predictions.class_map || {};
+          const segmentationMask = predictions.segmentation_mask;
+
+          // Decode segmentation mask to find predicted classes
+          let predictedClasses = [];
+          if (segmentationMask && classMap) {
+            try {
+              predictedClasses = await decodePredictedClasses(
+                segmentationMask,
+                classMap
+              );
+            } catch (error) {
+              console.error("Error decoding segmentation mask:", error);
+              // Fallback: show all available classes as potential detections
+              predictedClasses = Object.values(classMap).filter(
+                (cls) => cls !== "background"
+              );
+            }
+          }
+
+          let resultsHTML = `
+                    <div class="success">✅ Analysis completed successfully!</div>
+                    <div class="image-container">
+                        <div class="image-box">
+                            <h3>Original Image</h3>
+                            <img src="${selectedImage}" alt="Original image">
+                        </div>
+                `;
+
+          if (segmentationMask) {
+            resultsHTML += `
+                        <div class="image-box">
+                            <h3>Segmentation Mask</h3>
+                            <img src="data:image/png;base64,${segmentationMask}" alt="Segmentation mask">
+                        </div>
+                    `;
+          }
+
+          resultsHTML += `</div>`;
+
+          if (predictedClasses.length > 0) {
+            resultsHTML += `
+                        <div class="predicted-classes">
+                            <h3>🎯 Detected Food Items:</h3>
+                            ${predictedClasses
+                              .map(
+                                (className) =>
+                                  `<span class="class-item">${className}</span>`
+                              )
+                              .join("")}
+                        </div>
+                    `;
+          } else {
+            resultsHTML += `
+                        <div class="predicted-classes">
+                            <h3>🎯 Detection Results:</h3>
+                            <p>No specific food items detected, or only background detected.</p>
+                        </div>
+                    `;
+          }
+
+          // Show available classes
+          const availableClasses = Object.values(classMap).filter(
+            (cls) => cls !== "background"
+          );
+          if (availableClasses.length > 0) {
+            resultsHTML += `
+                        <div class="predicted-classes">
+                            <h3>📋 Available Food Classes:</h3>
+                            <p><small>${availableClasses.join(", ")}</small></p>
+                        </div>
+                    `;
+          }
+
+          // Show raw response for debugging
+          resultsHTML += `
+                    <details style="margin-top: 20px;">
+                        <summary>🔍 Raw API Response (for debugging)</summary>
+                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px;">${JSON.stringify(
+                          result,
+                          null,
+                          2
+                        )}</pre>
+                    </details>
+                `;
+
+          resultsDiv.innerHTML = resultsHTML;
+        } catch (error) {
+          console.error("Error processing results:", error);
+          showError(`Error processing results: ${error.message}`);
+        }
+      }
+
+      function showError(message) {
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = `
+          <div class="error">❌ ${message}</div>
+          <div style="margin-top: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+            <h4>🔧 Troubleshooting Tips:</h4>
+            <ul>
+              <li><strong>API Key:</strong> Make sure your API key "3WRiAnFfpoD83Bevoupm" is valid and active</li>
+              <li><strong>Model Endpoint:</strong> Verify "new-merged-0ma7p/3" is the correct model path</li>
+              <li><strong>CORS Issues:</strong> Try running this from a local server instead of opening the file directly</li>
+              <li><strong>Image Format:</strong> Ensure your image is in JPG, PNG, or other supported formats</li>
+              <li><strong>Network:</strong> Check your internet connection and try again</li>
+            </ul>
+            <p><small>Check the browser console (F12) for more detailed error information.</small></p>
+          </div>
+        `;
+      }
+    </script>
+  </body>
+</html>

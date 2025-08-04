@@ -1,0 +1,253 @@
+{
+  "alternatives": {
+    "bhat": {
+      "healthier_options": [
+        {
+          "name": "dhido",
+          "reason": "Lower GI (40 vs 70), higher fiber",
+          "improvement": "Better blood sugar control"
+        },
+        {
+          "name": "brown rice",
+          "reason": "Lower GI (50 vs 70), more nutrients",
+          "improvement": "Slower glucose release"
+        },
+        {
+          "name": "quinoa",
+          "reason": "Lower GI (35), complete protein",
+          "improvement": "Better protein and fiber content"
+        }
+      ]
+    },
+    "selroti": {
+      "healthier_options": [
+        {
+          "name": "millet roti",
+          "reason": "Lower GI (45 vs 75), more nutrients",
+          "improvement": "Better blood sugar control"
+        },
+        {
+          "name": "corn bread",
+          "reason": "Lower GI (60 vs 75), higher fiber",
+          "improvement": "Slower glucose release"
+        },
+        {
+          "name": "buckwheat pancake",
+          "reason": "Lower GI (45 vs 75), complete protein",
+          "improvement": "Better nutritional profile"
+        }
+      ]
+    },
+    "chowmein": {
+      "healthier_options": [
+        {
+          "name": "steamed vegetables with brown rice noodles",
+          "reason": "Lower calories, higher fiber",
+          "improvement": "Better portion control and nutrients"
+        },
+        {
+          "name": "vegetable stir-fry",
+          "reason": "More vegetables, less refined carbs",
+          "improvement": "Higher nutrient density"
+        },
+        {
+          "name": "shirataki noodles with vegetables",
+          "reason": "Very low calories and carbs",
+          "improvement": "Minimal blood sugar impact"
+        }
+      ]
+    },
+    "kheer": {
+      "healthier_options": [
+        {
+          "name": "unsweetened Greek yogurt with berries",
+          "reason": "Lower sugar, higher protein",
+          "improvement": "Better blood sugar control"
+        },
+        {
+          "name": "chia pudding with almond milk",
+          "reason": "Lower GI, omega-3 fatty acids",
+          "improvement": "Better nutritional profile"
+        },
+        {
+          "name": "fruit bowl with nuts",
+          "reason": "Natural sugars, healthy fats",
+          "improvement": "More balanced macronutrients"
+        }
+      ]
+    },
+    "momo": {
+      "healthier_options": [
+        {
+          "name": "steamed vegetables in lettuce wraps",
+          "reason": "Lower carbs, more vegetables",
+          "improvement": "Reduced blood sugar impact"
+        },
+        {
+          "name": "grilled chicken with salad",
+          "reason": "Higher protein, lower carbs",
+          "improvement": "Better macronutrient balance"
+        }
+      ]
+    },
+    "pakoda": {
+      "healthier_options": [
+        {
+          "name": "air-fried vegetables",
+          "reason": "Less oil, same taste",
+          "improvement": "Lower calories and fat"
+        },
+        {
+          "name": "roasted chickpeas",
+          "reason": "Higher protein and fiber",
+          "improvement": "Better satiety and blood sugar control"
+        }
+      ]
+    },
+    "samosa": {
+      "healthier_options": [
+        {
+          "name": "baked samosa with whole wheat",
+          "reason": "Less oil, more fiber",
+          "improvement": "Lower calories and better nutrients"
+        },
+        {
+          "name": "stuffed bell peppers",
+          "reason": "More vegetables, less refined carbs",
+          "improvement": "Higher nutrient density"
+        }
+      ]
+    },
+    "yomari": {
+      "healthier_options": [
+        {
+          "name": "steamed sweet potato",
+          "reason": "Natural sweetness, more fiber",
+          "improvement": "Better blood sugar control"
+        },
+        {
+          "name": "date and nut balls",
+          "reason": "Natural sugars, healthy fats",
+          "improvement": "More balanced nutrition"
+        }
+      ]
+    }
+  },
+  "pairings": {
+    "bhat": {
+      "recommended_with": [
+        {
+          "food": "daal",
+          "benefit": "Adds protein and fiber to slow glucose absorption"
+        },
+        {
+          "food": "gundruk",
+          "benefit": "High fiber helps reduce overall glycemic impact"
+        },
+        {
+          "food": "vegetables",
+          "benefit": "Increases nutrient density and fiber content"
+        }
+      ]
+    },
+    "roti": {
+      "recommended_with": [
+        {
+          "food": "daal",
+          "benefit": "Complete protein and fiber combination"
+        },
+        {
+          "food": "vegetables",
+          "benefit": "Increases fiber and reduces glycemic load"
+        },
+        {
+          "food": "yogurt",
+          "benefit": "Protein helps slow carbohydrate absorption"
+        }
+      ]
+    },
+    "pakoda": {
+      "recommended_with": [
+        {
+          "food": "green salad",
+          "benefit": "High fiber helps reduce oil absorption and glycemic impact"
+        },
+        {
+          "food": "mint chutney",
+          "benefit": "Adds flavor without extra calories"
+        },
+        {
+          "food": "herbal tea",
+          "benefit": "Aids digestion and reduces overall caloric impact"
+        }
+      ]
+    },
+    "momo": {
+      "recommended_with": [
+        {
+          "food": "vegetable soup",
+          "benefit": "Increases satiety with minimal calories"
+        },
+        {
+          "food": "fermented pickle",
+          "benefit": "Probiotics aid digestion"
+        }
+      ]
+    },
+    "chowmein": {
+      "recommended_with": [
+        {
+          "food": "mixed green salad",
+          "benefit": "Balances the meal with fiber and nutrients"
+        },
+        {
+          "food": "clear vegetable soup",
+          "benefit": "Increases satiety without extra calories"
+        }
+      ]
+    },
+    "selroti": {
+      "recommended_with": [
+        {
+          "food": "unsweetened yogurt",
+          "benefit": "Protein helps slow sugar absorption"
+        },
+        {
+          "food": "nuts",
+          "benefit": "Healthy fats help stabilize blood sugar"
+        }
+      ]
+    },
+    "kheer": {
+      "recommended_with": [
+        {
+          "food": "nuts and seeds",
+          "benefit": "Healthy fats and protein slow sugar absorption"
+        }
+      ]
+    }
+  },
+  "portion_tips": {
+    "high_gi_foods": {
+      "selroti": "Limit to 1 small piece, pair with protein",
+      "bhat": "Use smaller bowl (3/4 cup max), add vegetables",
+      "momo": "Limit to 3-4 pieces, add salad",
+      "yomari": "Occasional treat only, share portion",
+      "chiya": "Reduce sugar by half, limit to 1 cup"
+    },
+    "medium_gi_foods": {
+      "burger": "Choose lean protein, add vegetables, limit to half",
+      "kheer": "Small serving (1/2 cup), add nuts",
+      "roti": "1 medium size, pair with protein and vegetables",
+      "samosa": "1 piece maximum, add salad",
+      "pakoda": "2-3 pieces maximum, with green tea"
+    },
+    "low_gi_foods": {
+      "daal": "Good portion size, excellent base food",
+      "chana masala": "Standard serving, very diabetes-friendly",
+      "dhido": "Good alternative to rice",
+      "gundruk": "Excellent side dish, no limits",
+      "masu": "Focus on lean cuts, standard portion"
+    }
+  }
+}

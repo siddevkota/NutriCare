@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "expo-device": "^7.1.4",
+    "expo-file-system": "^18.1.11",
+    "expo-sensors": "^14.1.4"
+  }
+}

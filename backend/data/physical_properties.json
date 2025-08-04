@@ -1,0 +1,111 @@
+{
+  "physical_properties": {
+    "selroti": {
+      "density_g_per_cm3": 0.53,
+      "avg_thickness_cm": 5.0,
+      "typical_shape": "ring/donut",
+      "volume_estimation": "ring_volume"
+    },
+    "bhat": {
+      "density_g_per_cm3": 0.73,
+      "avg_thickness_cm": 2.0,
+      "typical_shape": "mound_on_plate",
+      "volume_estimation": "ellipsoid"
+    },
+    "burger": {
+      "density_g_per_cm3": 0.55,
+      "avg_thickness_cm": 4.0,
+      "typical_shape": "cylindrical",
+      "volume_estimation": "cylinder"
+    },
+    "chana masala": {
+      "density_g_per_cm3": 0.9,
+      "avg_thickness_cm": 3.0,
+      "typical_shape": "bowl_contents",
+      "volume_estimation": "bowl_volume"
+    },
+    "chiya": {
+      "density_g_per_cm3": 1.0,
+      "avg_thickness_cm": null,
+      "typical_shape": "liquid",
+      "volume_estimation": "liquid_volume"
+    },
+    "chowmein": {
+      "density_g_per_cm3": 0.65,
+      "avg_thickness_cm": 3.0,
+      "typical_shape": "plate_pile",
+      "volume_estimation": "ellipsoid"
+    },
+    "daal": {
+      "density_g_per_cm3": 1.0,
+      "avg_thickness_cm": 2.5,
+      "typical_shape": "bowl_contents",
+      "volume_estimation": "bowl_volume"
+    },
+    "dhido": {
+      "density_g_per_cm3": 0.9,
+      "avg_thickness_cm": 3.0,
+      "typical_shape": "bowl_contents",
+      "volume_estimation": "bowl_volume"
+    },
+    "gundruk": {
+      "density_g_per_cm3": 0.3,
+      "avg_thickness_cm": 2.0,
+      "typical_shape": "leafy_pile",
+      "volume_estimation": "irregular"
+    },
+    "kheer": {
+      "density_g_per_cm3": 1.0,
+      "avg_thickness_cm": 2.5,
+      "typical_shape": "bowl_contents",
+      "volume_estimation": "bowl_volume"
+    },
+    "masu": {
+      "density_g_per_cm3": 1.0,
+      "avg_thickness_cm": 3.0,
+      "typical_shape": "pieces_in_sauce",
+      "volume_estimation": "bowl_volume"
+    },
+    "momo": {
+      "density_g_per_cm3": 0.85,
+      "avg_thickness_cm": 2.5,
+      "typical_shape": "dumpling",
+      "volume_estimation": "sphere_approximation"
+    },
+    "pakoda": {
+      "density_g_per_cm3": 0.8,
+      "avg_thickness_cm": 2.0,
+      "typical_shape": "irregular_fritter",
+      "volume_estimation": "ellipsoid"
+    },
+    "roti": {
+      "density_g_per_cm3": 0.42,
+      "avg_thickness_cm": 0.3,
+      "typical_shape": "flat_circle",
+      "volume_estimation": "cylinder"
+    },
+    "samosa": {
+      "density_g_per_cm3": 0.7,
+      "avg_thickness_cm": 1.5,
+      "typical_shape": "triangular_pyramid",
+      "volume_estimation": "pyramid"
+    },
+    "yomari": {
+      "density_g_per_cm3": 0.95,
+      "avg_thickness_cm": 2.5,
+      "typical_shape": "conical",
+      "volume_estimation": "cone"
+    }
+  },
+  "volume_formulas": {
+    "cylinder": "π × r² × h",
+    "ellipsoid": "(4/3) × π × a × b × c",
+    "sphere_approximation": "(4/3) × π × r³",
+    "bowl_volume": "π × r² × h × 0.75",
+    "ring_volume": "π × (R² - r²) × h",
+    "pyramid": "(1/3) × base_area × height",
+    "cone": "(1/3) × π × r² × h",
+    "irregular": "bounding_box × fill_factor",
+    "liquid_volume": "container_volume"
+  }
+}

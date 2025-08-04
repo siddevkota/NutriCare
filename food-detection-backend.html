@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Food Detection with Python Backend</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+      .backend-info {
+        background-color: #e7f3ff;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+        border-left: 4px solid #007bff;
+      }
+      .upload-section {
+        border: 2px dashed #ddd;
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        margin: 20px 0;
+        transition: border-color 0.3s ease;
+      }
+      .upload-section:hover {
+        border-color: #007bff;
+      }
+      .upload-section.dragover {
+        border-color: #007bff;
+        background-color: #f8f9fa;
+      }
+      input[type="file"] {
+        display: none;
+      }
+      .upload-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      .upload-btn:hover {
+        background-color: #0056b3;
+      }
+      .analyze-btn {
+        background-color: #28a745;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+        margin: 10px 0;
+      }
+      .analyze-btn:hover {
+        background-color: #218838;
+      }
+      .analyze-btn:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+      }
+      .results {
+        margin-top: 20px;
+      }
+      .image-container {
+        display: flex;
+        gap: 20px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+      }
+      .image-box {
+        flex: 1;
+        min-width: 300px;
+      }
+      .image-box img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+      .predicted-classes {
+        background-color: #e7f3ff;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+      }
+      .class-item {
+        background-color: white;
+        padding: 8px 12px;
+        margin: 5px;
+        border-radius: 20px;
+        display: inline-block;
+        border: 2px solid #007bff;
+        color: #007bff;
+        font-weight: bold;
+      }
+      .error {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+      }
+      .success {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+      }
+      .warning {
+        background-color: #fff3cd;
+        color: #856404;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🍽️ Food Detection with Python Backend</h1>
+
+      <div class="backend-info">
+        <h4>🐍 Python Flask Backend</h4>
+        <p>
+          <strong>Backend URL:</strong>
+          <span id="backendUrl">http://localhost:5000</span>
+        </p>
+        <p>
+          <strong>Status:</strong> <span id="backendStatus">Checking...</span>
+        </p>
+        <p>
+          <small
+            >Make sure to start the Python backend first:
+            <code>cd backend && python app.py</code></small
+          >
+        </p>
+      </div>
+
+      <div class="upload-section" id="uploadSection">
+        <p>📷 Drag & drop an image here or click to select</p>
+        <button
+          class="upload-btn"
+          onclick="document.getElementById('imageInput').click()"
+        >
+          Choose Image
+        </button>
+        <input type="file" id="imageInput" accept="image/*" />
+      </div>
+
+      <button
+        class="analyze-btn"
+        id="analyzeBtn"
+        onclick="analyzeImage()"
+        disabled
+      >
+        Analyze Food Image
+      </button>
+
+      <button
+        class="analyze-btn"
+        id="testBtn"
+        onclick="testBackend()"
+        style="background-color: #6c757d; margin-top: 5px"
+      >
+        🧪 Test Backend Connection
+      </button>
+
+      <div id="results" class="results"></div>
+    </div>
+
+    <script>
+      let selectedImage = null;
+      let selectedImageFile = null;
+      const BACKEND_URL = "http://localhost:5000";
+
+      // Check backend status on page load
+      window.addEventListener("load", checkBackendStatus);
+
+      // File input handling
+      document
+        .getElementById("imageInput")
+        .addEventListener("change", handleImageSelect);
+
+      // Drag and drop handling
+      const uploadSection = document.getElementById("uploadSection");
+      uploadSection.addEventListener("dragover", handleDragOver);
+      uploadSection.addEventListener("drop", handleDrop);
+      uploadSection.addEventListener("dragleave", handleDragLeave);
+
+      function handleImageSelect(event) {
+        const file = event.target.files[0];
+        if (file && file.type.startsWith("image/")) {
+          selectedImageFile = file;
+          displayImage(file);
+          updateAnalyzeButton();
+        }
+      }
+
+      function handleDragOver(event) {
+        event.preventDefault();
+        uploadSection.classList.add("dragover");
+      }
+
+      function handleDrop(event) {
+        event.preventDefault();
+        uploadSection.classList.remove("dragover");
+
+        const file = event.dataTransfer.files[0];
+        if (file && file.type.startsWith("image/")) {
+          selectedImageFile = file;
+          displayImage(file);
+          updateAnalyzeButton();
+        }
+      }
+
+      function handleDragLeave() {
+        uploadSection.classList.remove("dragover");
+      }
+
+      function displayImage(file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          selectedImage = e.target.result;
+          const resultsDiv = document.getElementById("results");
+          resultsDiv.innerHTML = `
+            <div class="image-container">
+              <div class="image-box">
+                <h3>Original Image</h3>
+                <img src="${selectedImage}" alt="Selected image">
+              </div>
+            </div>
+          `;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function updateAnalyzeButton() {
+        const analyzeBtn = document.getElementById("analyzeBtn");
+        analyzeBtn.disabled = !selectedImageFile;
+      }
+
+      async function checkBackendStatus() {
+        const statusSpan = document.getElementById("backendStatus");
+        try {
+          const response = await fetch(`${BACKEND_URL}/`, { method: "GET" });
+          if (response.ok) {
+            const data = await response.json();
+            statusSpan.textContent = "✅ Connected";
+            statusSpan.style.color = "#28a745";
+          } else {
+            throw new Error("Backend not responding");
+          }
+        } catch (error) {
+          statusSpan.textContent = "❌ Disconnected";
+          statusSpan.style.color = "#dc3545";
+          showError(
+            "Backend not running. Please start the Python backend first."
+          );
+        }
+      }
+
+      async function testBackend() {
+        const testBtn = document.getElementById("testBtn");
+        const resultsDiv = document.getElementById("results");
+
+        testBtn.disabled = true;
+        testBtn.textContent = "Testing...";
+
+        try {
+          const response = await fetch(`${BACKEND_URL}/test`, {
+            method: "GET",
+          });
+
+          if (!response.ok) {
+            throw new Error(`Backend test failed: ${response.status}`);
+          }
+
+          const result = await response.json();
+
+          if (result.status === "success") {
+            resultsDiv.innerHTML = `
+              <div class="success">✅ Backend Test Successful!</div>
+              <div style="margin-top: 15px; padding: 15px; background-color: #e7f3ff; border-radius: 5px;">
+                <h4>🎉 Your Python backend is working correctly!</h4>
+                <p><strong>Model:</strong> ${result.model_id}</p>
+                <p><strong>Status:</strong> Connected and responding</p>
+                <p>You can now upload and analyze your own food images.</p>
+                <details style="margin-top: 10px;">
+                  <summary>Test Response</summary>
+                  <pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 12px;">${JSON.stringify(
+                    result,
+                    null,
+                    2
+                  )}</pre>
+                </details>
+              </div>
+            `;
+          } else {
+            throw new Error(result.message || "Backend test failed");
+          }
+        } catch (error) {
+          console.error("Backend Test Error:", error);
+          showError(`Backend Test Failed: ${error.message}`);
+        } finally {
+          testBtn.disabled = false;
+          testBtn.textContent = "🧪 Test Backend Connection";
+        }
+      }
+
+      async function analyzeImage() {
+        const resultsDiv = document.getElementById("results");
+
+        if (!selectedImageFile) {
+          showError("Please select an image first.");
+          return;
+        }
+
+        // Show loading state
+        const analyzeBtn = document.getElementById("analyzeBtn");
+        analyzeBtn.disabled = true;
+        analyzeBtn.textContent = "Analyzing...";
+
+        try {
+          // Convert image to base64
+          const base64Image = await fileToBase64(selectedImageFile);
+
+          console.log("Sending image to Python backend...");
+
+          // Send to Python backend
+          const response = await fetch(`${BACKEND_URL}/predict`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              image: base64Image,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(
+              errorData.message || `Backend request failed: ${response.status}`
+            );
+          }
+
+          const result = await response.json();
+          console.log("Backend Response:", result);
+
+          if (result.status === "success") {
+            displayResults(result);
+          } else {
+            throw new Error(result.message || "Analysis failed");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          showError(`Analysis failed: ${error.message}`);
+        } finally {
+          // Reset button state
+          analyzeBtn.disabled = false;
+          analyzeBtn.textContent = "Analyze Food Image";
+          updateAnalyzeButton();
+        }
+      }
+
+      function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = (error) => reject(error);
+        });
+      }
+
+      function displayResults(result) {
+        const resultsDiv = document.getElementById("results");
+
+        const detectedClasses = result.detected_classes || [];
+        const rawResult = result.raw_result || {};
+
+        let resultsHTML = `
+          <div class="success">✅ Analysis completed successfully!</div>
+          <div class="image-container">
+            <div class="image-box">
+              <h3>Original Image</h3>
+              <img src="${selectedImage}" alt="Original image">
+            </div>
+          </div>
+        `;
+
+        if (detectedClasses.length > 0) {
+          resultsHTML += `
+            <div class="predicted-classes">
+              <h3>🎯 Detected Food Items:</h3>
+              ${detectedClasses
+                .map(
+                  (className) => `<span class="class-item">${className}</span>`
+                )
+                .join("")}
+            </div>
+          `;
+        } else {
+          resultsHTML += `
+            <div class="predicted-classes">
+              <h3>🎯 Detection Results:</h3>
+              <p>No specific food items detected, or only background detected.</p>
+            </div>
+          `;
+        }
+
+        // Show segmentation mask if available
+        if (rawResult.predictions && rawResult.predictions.segmentation_mask) {
+          resultsHTML = resultsHTML.replace(
+            "</div>",
+            `
+              <div class="image-box">
+                <h3>Segmentation Mask</h3>
+                <img src="data:image/png;base64,${rawResult.predictions.segmentation_mask}" alt="Segmentation mask">
+              </div>
+            </div>`
+          );
+        }
+
+        // Show raw response for debugging
+        resultsHTML += `
+          <details style="margin-top: 20px;">
+            <summary>🔍 Raw Backend Response (for debugging)</summary>
+            <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px;">${JSON.stringify(
+              result,
+              null,
+              2
+            )}</pre>
+          </details>
+        `;
+
+        resultsDiv.innerHTML = resultsHTML;
+      }
+
+      function showError(message) {
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = `
+          <div class="error">❌ ${message}</div>
+          <div style="margin-top: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+            <h4>🔧 Troubleshooting Tips:</h4>
+            <ul>
+              <li><strong>Backend Status:</strong> Make sure the Python backend is running on port 5000</li>
+              <li><strong>Start Backend:</strong> Run <code>cd backend && python app.py</code></li>
+              <li><strong>Dependencies:</strong> Install requirements with <code>pip install -r requirements.txt</code></li>
+              <li><strong>CORS:</strong> Backend includes CORS headers for browser compatibility</li>
+              <li><strong>Image Format:</strong> Ensure your image is in JPG, PNG, or other supported formats</li>
+            </ul>
+            <p><small>Check the browser console (F12) and backend logs for more detailed error information.</small></p>
+          </div>
+        `;
+      }
+    </script>
+  </body>
+</html>
